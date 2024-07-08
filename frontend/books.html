@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e6ccb2; /* Marron clair */
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f2e0cc; /* Fond beige */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .container h2, .container h3 {
+            color: #6b4c3f; /* Marron foncé */
+            text-align: center;
+        }
+        .book-list {
+            margin-top: 20px;
+        }
+        .book-item {
+            padding: 10px;
+            background-color: #fff;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .book-item h3 {
+            margin-bottom: 5px;
+            color: #6b4c3f; /* Marron foncé */
+        }
+        .book-item p {
+            margin: 0;
+            color: #856c5a; /* Marron moyen pour le texte */
+        }
+        .borrow-form {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .borrow-form h3, .borrow-form label {
+            font-weight: bold;
+            color: #6b4c3f; /* Marron foncé */
+        }
+        .borrow-form input, .borrow-form select {
+            width: calc(100% - 20px);
+            padding: 8px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .borrow-form button {
+            background-color: #8d6e63; /* Marron */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .borrow-form button:hover {
+            background-color: #6b4c3f; /* Marron plus foncé au survol */
+        }
+        .borrow-message {
+            background-color: #c3d9e6; /* Bleu clair pour le message */
+            color: #205c80; /* Bleu marine pour le texte du message */
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #99b3cc; /* Bordure légère */
+            display: none; /* Caché par défaut */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to the Library</h2>
+        <h3>Available Books</h3>
+        <div class="book-list" id="availableBooks">
+            <!-- This will be populated dynamically -->
+        </div>
+
+        <h3>Your Borrowed Books</h3>
+        <div class="book-list" id="borrowedBooks">
+            <!-- This will be populated dynamically -->
+        </div>
+
+        <div class="borrow-form" id="borrowForm">
+            <h3>Borrow a Book</h3>
+            <form id="borrowBookForm">
+                <label for="bookSelect">Select a Book:</label>
+                <select id="bookSelect" required>
+                    <!-- Options will be populated dynamically -->
+                </select>
+                <br>
+                <label for="borrowDate">Borrow Date:</label>
+                <input type="date" id="borrowDate" required>
+                <br>
+                <label for="returnDate">Return Date:</label>
+                <input type="date" id="returnDate" required>
+                <br><br>
+                <button type="submit">Borrow Book</button>
+            </form>
+        </div>
+
+        <!-- Borrow message display -->
+        <div id="borrowMessage" class="borrow-message"></div>
+    </div>
+
+    <!-- Axios library (ensure you have it included) -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <script>
+        // Function to fetch and display available books
+        function fetchAvailableBooks() {
+            axios.get('http://127.0.0.1:5000/books')
+                .then(function(response) {
+                    var availableBooks = response.data.books;
+                    var availableBooksContainer = document.getElementById('availableBooks');
+                    availableBooksContainer.innerHTML = ''; // Clear previous content
+
+                    availableBooks.forEach(function(book) {
+                        var bookItem = document.createElement('div');
+                        bookItem.classList.add('book-item');
+                        bookItem.innerHTML = `
+                            <h3>${book.title}</h3>
+                            <p><strong>Writer:</strong> ${book.writer}</p>
+                            <p><strong>Year:</strong> ${book.year}</p>
+                            <p><strong>Owner:</strong> ${book.owner}</p>
+                        `;
+                        availableBooksContainer.appendChild(bookItem);
+                    });
+                })
+                .catch(function(error) {
+                    console.error('Error fetching available books:', error);
+                });
+        }
+
+        // Function to fetch and display borrowed books for the current user
+        function fetchBorrowedBooks() {
+            axios.get('http://127.0.0.1:5000/books/borrowed')
+                .then(function(response) {
+                    var borrowedBooks = response.data.borrowed_books;
+                    var borrowedBooksContainer = document.getElementById('borrowedBooks');
+                    borrowedBooksContainer.innerHTML = ''; // Clear previous content
+
+                    borrowedBooks.forEach(function(borrowedBook) {
+                        var bookItem = document.createElement('div');
+                        bookItem.classList.add('book-item');
+                        bookItem.innerHTML = `
+                            <h3>${borrowedBook.title}</h3>
+                            <p><strong>Writer:</strong> ${borrowedBook.writer}</p>
+                            <p><strong>Year:</strong> ${borrowedBook.year}</p>
+                            <p><strong>Owner:</strong> ${borrowedBook.owner}</p>
+                            <p><strong>Borrow Date:</strong> ${borrowedBook.borrow_date}</p>
+                            <p><strong>Return Date:</strong> ${borrowedBook.return_date}</p>
+                        `;
+                        borrowedBooksContainer.appendChild(bookItem);
+                    });
+                })
+                .catch(function(error) {
+                    console.error('Error fetching borrowed books:', error);
+                });
+        }
+
+        // Function to populate the borrow form with available books
+        function populateBorrowForm() {
+            axios.get('http://127.0.0.1:5000/books')
+                .then(function(response) {
+                    var availableBooks = response.data.books;
+                    var bookSelect = document.getElementById('bookSelect');
+                    bookSelect.innerHTML = ''; // Clear previous options
+
+                    availableBooks.forEach(function(book) {
+                        var option = document.createElement('option');
+                        option.value = book.id;
+                        option.textContent = book.title;
+                        bookSelect.appendChild(option);
+                    });
+                })
+                .catch(function(error) {
+                    console.error('Error populating borrow form:', error);
+                });
+        }
+
+        // Event listener for the borrow book form submission
+        document.getElementById('borrowBookForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var bookId = document.getElementById('bookSelect').value;
+            var borrowDate = document.getElementById('borrowDate').value;
+            var returnDate = document.getElementById('returnDate').value;
+
+            var data = {
+                book_id: parseInt(bookId),
+                borrow_date: borrowDate,
+                return_date: returnDate
+            };
+
+            axios.post('http://127.0.0.1:5000/books/borrow', data)
+                .then(function(response) {
+                    console.log('Book borrowed successfully:', response.data.message);
+                    // Display borrow message
+                    var borrowMessage = document.getElementById('borrowMessage');
+                    borrowMessage.textContent = `Tu as emprunté "${response.data.borrowed_book.title}". Tu dois le rendre le ${returnDate}.`;
+                    borrowMessage.style.display = 'block'; // Show message
+                    // Refresh borrowed books list
+                    fetchBorrowedBooks();
+                })
+                .catch(function(error) {
+                    console.error('Error borrowing book:', error);
+                });
+        });
+
+        // On page load, fetch and display available and borrowed books
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchAvailableBooks();
+            fetchBorrowedBooks();
+            populateBorrowForm();
+        });
+    </script>
+</body>
+</html>
