@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Page</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Assurez-vous d'avoir un fichier CSS appelé styles.css avec le thème marron -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ead8c2; /* Couleur de fond marron clair */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .register-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        .register-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #5c4033; /* Couleur de texte marron foncé */
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            color: #5c4033; /* Couleur de texte marron foncé */
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group button {
+            background-color: #8d6e63; /* Marron */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            border-radius: 4px;
+        }
+        .form-group button:hover {
+            background-color: #6b4c3f; /* Marron plus foncé au survol */
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h2>Register</h2>
+        <div id="errorMessage" class="error-message"></div>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="role">Role</label>
+                <select id="role" name="role">
+                    <option value="user" selected>User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="button" id="registerBtn">Register</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Axios library (ensure you have it included) -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        document.getElementById('registerBtn').addEventListener('click', function(){
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+            var role = document.getElementById('role').value;
+
+            // Prepare data to send
+            var data = {
+                username: username,
+                password: password,
+                role: role
+            };
+
+            // Send POST request to Flask backend
+            axios.post('http://127.0.0.1:5000/register', data)
+            .then(function(response) {
+                console.log('Registration successful:', response.data.message);
+                alert('Registration successful!'); // You can customize this message as needed
+                // Redirect to login page after successful registration
+                window.location.href = '/login-page';
+            })
+            .catch(function(error) {
+                console.error('Error during POST request:', error);
+                var errorMessage = (error.response && error.response.data && error.response.data.error) || 'Registration failed. Please try again.';
+                document.getElementById('errorMessage').textContent = errorMessage;
+            });
+        });
+    </script>
+</body>
+</html>
